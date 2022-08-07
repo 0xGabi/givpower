@@ -2,11 +2,9 @@
 
 pragma solidity =0.8.6;
 
-import './GardenUnipoolTokenDistributor.sol';
-import './interfaces/IGardenUnipool.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol';
+import './GardenUnipoolTokenDistributor.sol';
 import './interfaces/ITokenManager.sol';
-
 
 contract GIVpower is GardenUnipoolTokenDistributor, IERC20MetadataUpgradeable {
     using SafeMathUpgradeable for uint256;
@@ -48,6 +46,7 @@ contract GIVpower is GardenUnipoolTokenDistributor, IERC20MetadataUpgradeable {
         if (_rounds > maxLockRounds) {
             revert LockRoundLimit();
         }
+
         UserLock storage _userLock = userLocks[msg.sender];
         IERC20 token = _getToken();
 
@@ -82,7 +81,8 @@ contract GIVpower is GardenUnipoolTokenDistributor, IERC20MetadataUpgradeable {
             RoundBalance storage _roundBalance = _userLock.roundBalances[_round];
 
             // @dev Based on the design, unlockableTokenAmount and releasablePowerAmount are both zero or both positive
-            if (_roundBalance.unlockableTokenAmount == 0) { // && _roundBalance._releasablePowerAmount == 0
+            if (_roundBalance.unlockableTokenAmount == 0) {
+                // && _roundBalance._releasablePowerAmount == 0
                 continue;
             }
 
@@ -110,7 +110,7 @@ contract GIVpower is GardenUnipoolTokenDistributor, IERC20MetadataUpgradeable {
     }
 
     function calculatePower(uint256 _amount, uint256 _rounds) public pure returns (uint256) {
-        return _amount.mul(_sqrt(_rounds.add(1).mul(10**18))).div(10**9);
+        return _amount.mul(_sqrt(_rounds.add(1).mul(10 ** 18))).div(10 ** 9);
     }
 
     /**
@@ -127,6 +127,7 @@ contract GIVpower is GardenUnipoolTokenDistributor, IERC20MetadataUpgradeable {
         } else if (y != 0) {
             z = 1;
         }
+        // else z = 0 (default value)
     }
 
     /**
@@ -134,11 +135,7 @@ contract GIVpower is GardenUnipoolTokenDistributor, IERC20MetadataUpgradeable {
      * @param _from 0x0 if we are wrapping gGIV
      * @param _amount Number of gGIV that is wrapped/unwrapped
      */
-    function _onTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) internal override returns (bool) {
+    function _onTransfer(address _from, address _to, uint256 _amount) internal override returns (bool) {
         require(super._onTransfer(_from, _to, _amount));
 
         if (_from != address(0)) {
@@ -152,15 +149,15 @@ contract GIVpower is GardenUnipoolTokenDistributor, IERC20MetadataUpgradeable {
         return true;
     }
 
-    function name() public view override returns (string memory) {
-        return "GIVpower";
+    function name() public pure override returns (string memory) {
+        return 'GIVpower';
     }
 
-    function symbol() public view override returns (string memory) {
-        return "POW";
+    function symbol() public pure override returns (string memory) {
+        return 'POW';
     }
 
-    function decimals() public view override returns (uint8) {
+    function decimals() public pure override returns (uint8) {
         return 18;
     }
 
@@ -184,11 +181,7 @@ contract GIVpower is GardenUnipoolTokenDistributor, IERC20MetadataUpgradeable {
         revert TokenNonTransferable();
     }
 
-    function transferFrom(
-        address,
-        address,
-        uint256
-    ) public pure override returns (bool) {
+    function transferFrom(address, address, uint256) public pure override returns (bool) {
         revert TokenNonTransferable();
     }
 
